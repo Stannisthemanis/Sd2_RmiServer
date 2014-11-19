@@ -38,33 +38,33 @@ INSERT INTO  user_group_user VALUES (3,8);
 INSERT INTO  user_group_user VALUES (3,9);
 INSERT INTO  user_group_user VALUES (3,10);
 
-INSERT INTO message VALUES(1,STR_TO_DATE('2014/11/13 11:10', 'yyyy/mm/dd hh24:mi'),'ola \n td bem? \n como fica o assunto da rede?');
-INSERT INTO message VALUES(2,STR_TO_DATE('2014/11/14 21:20', 'yyyy/mm/dd hh24:mi'),'oi \n td bem? \n sim e contigo?');
-INSERT INTO message VALUES(3,STR_TO_DATE('2014/11/15 12:30', 'yyyy/mm/dd hh24:mi'),'vamos la? \n onde? \n a reuniao?');
-INSERT INTO message VALUES(4,STR_TO_DATE('2014/11/12 11:40', 'yyyy/mm/dd hh24:mi'),'como fazemos? \n nao sei? \n como fica o assunto da rede?');
-INSERT INTO message VALUES(5,STR_TO_DATE('2014/11/11 13:50', 'yyyy/mm/dd hh24:mi'),'ola \n td? \n como fica o router??');
-
-INSERT INTO action_item VALUES (1,'comprar cabos',1,'n');
-INSERT INTO action_item VALUES (2,'pagar contas da edp',10,'s');
-INSERT INTO action_item VALUES (3,'fazer novo contrato',5,'n');
-INSERT INTO action_item VALUES (4,'alterar o rmi',2,'n');
-INSERT INTO action_item VALUES (5,'rever relacoes da bd',9,'s');
-
-INSERT INTO agenda_item VALUES (1,'decidir rmi',NULL);
-INSERT INTO agenda_item VALUES (2,'cliente web',NULL);
-INSERT INTO agenda_item VALUES (3,'rede',NULL);
-INSERT INTO agenda_item VALUES (4,'decidir api a usar',NULL);
-INSERT INTO agenda_item VALUES (5,'novo pc servidor',NULL);
-
 INSERT INTO meeting VALUES (1,'rmi','responsaveis',1,'sala e4.1',to_Date('2014/11/13 10:20','yyyy/mm/dd hh24:mi'),
                             to_Date('2014/11/13 14:20' , 'yyyy/mm/dd hh24:mi'),240,1,1,4);
 INSERT INTO meeting VALUES (2,'rmi','responsaveis',3,'sala e4.1',to_Date('2014/11/14 10:20','yyyy/mm/dd hh24:mi'),
                             to_Date('2014/11/13 14:20' , 'yyyy/mm/dd hh24:mi'),240,2,1,3);
 INSERT INTO meeting VALUES (3,'rmi','responsaveis',6,'sala e4.1',to_Date('2014/11/15 10:20','yyyy/mm/dd hh24:mi'),
-                            to_Date('2014/11/13 14:20' , 'yyyy/mm/dd hh24:mi'),240,3,1,2)
+                            to_Date('2014/11/13 14:20' , 'yyyy/mm/dd hh24:mi'),240,3,1,2);
+
+INSERT INTO agenda_item VALUES (1,'decidir rmi',1);
+INSERT INTO agenda_item VALUES (2,'cliente web',1);
+INSERT INTO agenda_item VALUES (3,'rede',2);
+INSERT INTO agenda_item VALUES (4,'decidir api a usar',2);
+INSERT INTO agenda_item VALUES (5,'novo pc servidor',3);
+
+
+INSERT INTO message VALUES(1,1,STR_TO_DATE('2014/11/13 11:10', 'yyyy/mm/dd hh24:mi'),'ola \n td bem? \n como fica o assunto da rede?');
+INSERT INTO message VALUES(2,2,STR_TO_DATE('2014/11/14 21:20', 'yyyy/mm/dd hh24:mi'),'oi \n td bem? \n sim e contigo?');
+INSERT INTO message VALUES(3,3,STR_TO_DATE('2014/11/15 12:30', 'yyyy/mm/dd hh24:mi'),'vamos la? \n onde? \n a reuniao?');
+INSERT INTO message VALUES(4,4,STR_TO_DATE('2014/11/12 11:40', 'yyyy/mm/dd hh24:mi'),'como fazemos? \n nao sei? \n como fica o assunto da rede?');
+INSERT INTO message VALUES(5,5,STR_TO_DATE('2014/11/11 13:50', 'yyyy/mm/dd hh24:mi'),'ola \n td? \n como fica o router??');
+
+INSERT INTO action_item VALUES (1,'comprar cabos',1,'n',1);
+INSERT INTO action_item VALUES (2,'pagar contas da edp',10,'s',1);
+INSERT INTO action_item VALUES (3,'fazer novo contrato',5,'n',2);
+INSERT INTO action_item VALUES (4,'alterar o rmi',2,'n',3);
+INSERT INTO action_item VALUES (5,'rever relacoes da bd',9,'s',3);
     
 INSERT INTO invite VALUES(1,1,2);
-INSERT INTO invite VALUES(1,1,10);
 INSERT INTO invite VALUES(2,1,9);
 INSERT INTO invite VALUES(3,2,8);
 INSERT INTO invite VALUES(4,2,7);
