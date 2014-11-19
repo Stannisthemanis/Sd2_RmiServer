@@ -1,13 +1,66 @@
 package meeto.rmiserver;
 
+import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 
-public class RmiServer extends UnicastRemoteObject implements RmiServerInterface{
-
+@SuppressWarnings("deprecation")
+public class RmiServer extends UnicastRemoteObject implements RmiServerInterface {
+	
+	private static final long	serialVersionUID	= 1L;
+	
 	protected RmiServer() throws RemoteException {
 		super();
-		// TODO Auto-generated constructor stub
 	}
-
+	
+	public static void main(String[] args) {
+		
+		System.getProperties().put("java.security.policy", "policy.all");
+		System.setSecurityManager(new RMISecurityManager());
+		try {
+			RmiServerInterface rmiServer = new RmiServer();
+			LocateRegistry.createRegistry(1099).rebind("DataBase", rmiServer);
+			System.out.println("RmiServer Ready");
+			if (isDatabaseEmpty()) {
+				//createDataBase();
+			}
+			System.exit(0); // NAO ESQUECER DE REMOVER ISTO
+		} catch (RemoteException e) {
+			System.out.println("*** RmiServer: " + e.getMessage());
+		}
+		
+	}
+	
+	private static Connection getConnectionToDataBase() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+		String url = "jdbc:mysql://localhost:3306/";
+		String dbName = "sd2_bd";
+		String driver = "com.mysql.jdbc.Driver";
+		String userName = "root";
+		String password = "Roxkax77";
+		Class.forName(driver).newInstance();
+		return DriverManager.getConnection(url + dbName, userName, password);
+	}
+	
+	public static boolean isDatabaseEmpty() {
+		try {
+			Connection connection = getConnectionToDataBase();
+			Statement statment = connection.createStatement();
+			ResultSet queryResult = statment.executeQuery("SHOW TABLES");
+			if(!queryResult.next()){
+				connection.close();	
+				return true;
+			}
+		} catch (Exception e) {
+			System.out.println("RmiServer.checkIfDatabaseEmpty()  " + e.getMessage());
+		}
+		return false;
+	}
+	
 }
