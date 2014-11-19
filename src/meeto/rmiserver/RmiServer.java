@@ -1,5 +1,7 @@
 package meeto.rmiserver;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -9,7 +11,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 
 @SuppressWarnings("deprecation")
 public class RmiServer extends UnicastRemoteObject implements RmiServerInterface {
@@ -44,6 +45,14 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 		String driver = "com.mysql.jdbc.Driver";
 		String userName = "root";
 		String password = "Roxkax77";
+		try {
+			if (InetAddress.getLocalHost().equals(InetAddress.getByName("ricardo"))) {
+				userName = "userDoRicardo";
+				password = "passDoRicardo";
+			}
+		} catch (UnknownHostException e) {
+			
+		}
 		Class.forName(driver).newInstance();
 		return DriverManager.getConnection(url + dbName, userName, password);
 	}
