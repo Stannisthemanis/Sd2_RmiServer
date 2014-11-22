@@ -91,8 +91,8 @@ CREATE TABLE users_on_chat(
     id_user                 INT NOT NULL,
     id_agenda_item          INT NOT NULL,
     FOREIGN KEY(id_user)        REFERENCES user1(id_user),
-    FOREIGN KEY(id_agenda_item) REFERENCES agenda_item(id_agenda_item)
-    PRIMARY KEY(id_user,id_agenda_item)
+    FOREIGN KEY(id_agenda_item) REFERENCES agenda_item(id_agenda_item),
+    PRIMARY KEY(id_user, id_agenda_item)
 );
 
 CREATE TABLE meeting_user_group( 
