@@ -12,6 +12,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * @author Diogo
+ *
+ */
 @SuppressWarnings("deprecation")
 public class RmiServer extends UnicastRemoteObject implements RmiServerInterface {
 	
@@ -139,16 +143,24 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 		return id_user;
 	}
 	
-	public void removeUserFromAllChats(String user) throws RemoteException {
-		String query = "DELETE FROM users_on_chat WHERE id_user = ";
+	public int removeUserFromAllChats(String user) throws RemoteException {
+		String query = String.format("SELECT id_agenda_item FROM users_on_chat WHERE id_user = %d;",getUserId(user));
+		String query2 = String.format("DELETE FROM users_on_chat WHERE id_user = %d", getUserId(user));
+		int id_agenda_item = 0;
 		try {
 			Connection connection = getConnectionToDataBase();
 			Statement statement = connection.createStatement();
-			query += getUserId(user) + "";
-			statement.execute(query);
+			ResultSet resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				id_agenda_item = resultSet.getInt("id_agenda_item");
+			}
+			statement.execute(query2);
+			System.out.println("Removed " + user);
 		} catch (Exception e) {
 			System.out.println("RmiServer.removeUserFromAllChats() " + e.getMessage());
+			return id_agenda_item;
 		}
+		return id_agenda_item;
 		
 	}
 	
@@ -228,7 +240,7 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 			while (queryResult.next()) {
 				id_meeting = queryResult.getInt("id_meeting");
 				title = queryResult.getString("title");
-				finalList += String.format("%d - %s\n", id_meeting, title);
+				finalList += String.format("%d -> %s\n", id_meeting, title);
 			}
 		} catch (Exception e) {
 			System.out.println("RmiServer.getListUpcumingMeetings() " + e.getMessage());
@@ -253,7 +265,7 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 			while (queryResult.next()) {
 				id_meeting = queryResult.getInt("id_meeting");
 				title = queryResult.getString("title");
-				finalList += String.format("%d - %s\n", id_meeting, title);
+				finalList += String.format("%d-> %s\n", id_meeting, title);
 			}
 		} catch (Exception e) {
 			System.out.println("RmiServer.getListPassedMeetings() " + e.getMessage());
@@ -278,7 +290,7 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 			while (queryResult.next()) {
 				id_meeting = queryResult.getInt("id_meeting");
 				title = queryResult.getString("title");
-				finalList += String.format("%d - %s\n", id_meeting, title);
+				finalList += String.format("%d-> %s\n", id_meeting, title);
 			}
 		} catch (Exception e) {
 			System.out.println("RmiServer.getListCurrentMeetings() " + e.getMessage());
@@ -303,7 +315,7 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 			Statement statement = connection.createStatement();
 			ResultSet queryResult = statement.executeQuery(query1);
 			while (queryResult.next()) {
-				title = " Title: " + queryResult.getString("title") + "\n";
+				title = "Title: " + queryResult.getString("title") + "\n";
 				username = "Created By: " + queryResult.getString("username") + "\n";
 				outcome = "Expected outcome: " + queryResult.getString("outcome") + "\n";
 				startDate = "Starts at: " + queryResult.getTimestamp("s_date").toString() + "\n";
@@ -322,22 +334,22 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 			System.out.println("RmiServer.getMeetingResume() " + e.getMessage());
 		}
 		
-		return String.format("%s %s %s %s %s %s %s %s", title, username, outcome, startDate, endDate, listOfUsers,
-				getListOfAgendaItensFromMeeting(id_meeting), getListActionItensFromMeeting(id_meeting));
+		return String.format("%s%s%s%s%s%sList Of Agenda Itens:\n%sList of Action Itens:\n%s\n", title, username, outcome, startDate,
+				endDate, listOfUsers, getListOfAgendaItensFromMeeting(id_meeting), getListActionItensFromMeeting(id_meeting));
 	}
 	
 	public String getListOfAgendaItensFromMeeting(int id_meeting) throws RemoteException {
 		String query = String.format(
 				"SELECT id_agenda_item, item_to_discuss, key_decision FROM agenda_item WHERE id_meeting = %d ORDER BY 1", id_meeting);
-		String finalList = "List of agenda itens: \n";
+		String finalList = "";
 		try {
 			Connection connection = getConnectionToDataBase();
 			Statement statement = connection.createStatement();
 			ResultSet queryResult = statement.executeQuery(query);
 			while (queryResult.next()) {
-				finalList += "      - " + queryResult.getInt("id_agenda_item") + " - " + queryResult.getString("item_to_discuss");
+				finalList += queryResult.getInt("id_agenda_item") + "-> " + queryResult.getString("item_to_discuss");
 				if (queryResult.getString("key_decision") != null) {
-					finalList += queryResult.getString("key_decision");
+					finalList += "	Key Decision: " + queryResult.getString("key_decision");
 				}
 				finalList += "\n";
 			}
@@ -356,7 +368,7 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 			Statement statement = connection.createStatement();
 			ResultSet queryResult = statement.executeQuery(query);
 			while (queryResult.next()) {
-				finalList += "      - " + queryResult.getInt("id_invite") + " - " + queryResult.getString("title") + "\n";
+				finalList += queryResult.getInt("id_invite") + "-> " + queryResult.getString("title") + "\n";
 			}
 		} catch (Exception e) {
 			System.out.println("RmiServer.getListOfInvitesByUser() " + e.getMessage());
@@ -484,7 +496,8 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 	}
 	
 	public int getSizeOfTodo(String user) throws RemoteException {
-		String query = String.format(" SELECT count(*) AS \"sizeOfTodo\" FROM action_item WHERE id_user = %d;", getUserId(user));
+		String query = String.format(" SELECT count(*) AS \"sizeOfTodo\" FROM action_item WHERE id_user = %d AND completed = '%s';",
+				getUserId(user), "To Be Done");
 		int sizeOfTodo = -1;
 		try {
 			Connection connection = getConnectionToDataBase();
@@ -508,7 +521,7 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 			Statement statement = connection.createStatement();
 			ResultSet queryResult = statement.executeQuery(query);
 			while (queryResult.next()) {
-				listOfAction += "      - " + queryResult.getInt("id_action_item") + " - " + queryResult.getString("name") + " -> "
+				listOfAction += queryResult.getInt("id_action_item") + "-> " + queryResult.getString("name") + " ---> "
 						+ queryResult.getString("completed") + "\n";
 			}
 		} catch (Exception e) {
@@ -533,23 +546,20 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 	public String getListActionItensFromMeeting(int id_meeting) throws RemoteException {
 		String query = String.format("SELECT ac.id_action_item, ac.name, u.username, ac.completed FROM action_item ac, user1 u "
 				+ "WHERE ac.id_meeting = %d AND ac.id_user = u.id_user ORDER BY 1", id_meeting);
-		String finalList = "List of actions:\n";
+		String finalList = "";
 		try {
 			Connection connection = getConnectionToDataBase();
 			Statement statement = connection.createStatement();
 			ResultSet queryResult = statement.executeQuery(query);
-			
-			if (!queryResult.next()) {
-				finalList += "      - No action as been defined yet\n";
-			} else
-				queryResult.previous();
 			while (queryResult.next()) {
-				System.out.println("ac " + queryResult.getInt("id_action_item"));
-				finalList += "      - " + queryResult.getInt("id_action_item") + " - " + queryResult.getString("name") + " -> "
-						+ queryResult.getString("username") + " : " + queryResult.getString("completed") + "\n";
+				finalList += "      - " + queryResult.getInt("id_action_item") + " - " + queryResult.getString("name") + ": "
+						+ queryResult.getString("username") + " -> " + queryResult.getString("completed") + "\n";
 			}
 		} catch (Exception e) {
 			System.out.println("RmiServer.getListActionItensFromMeeting() " + e.getMessage());
+		}
+		if (finalList == "") {
+			finalList = "      - This meeting has no action itens yet";
 		}
 		return finalList;
 	}
@@ -577,19 +587,21 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 		return messageHistory;
 	}
 	
-	public void addClientToChat(int id_agenda_item, String user) throws RemoteException {
-		String query = String.format("INSERT INTO users_on_chat (id_agenda_item, id_user) VALUES(%d, %d)", id_agenda_item, getUserId(user));
+	public boolean addClientToChat(int id_agenda_item, String user) throws RemoteException {
+		String query = String.format("INSERT INTO users_on_chat VALUES(%d, %d)", getUserId(user), id_agenda_item);
 		try {
 			Connection connection = getConnectionToDataBase();
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(query);
 		} catch (Exception e) {
 			System.out.println("RmiServer.addClientToChat() " + e.getMessage());
+			return false;
 		}
+		return true;
 	}
 	
 	public boolean testIfUserIsOnChat(int id_agenda_item, String user) throws RemoteException {
-		String query = String.format("SELECT id_user FROM agenda_item WHERE id_user = %d AND id_agenda_item = %d", getUserId(user),
+		String query = String.format("SELECT id_user FROM users_on_chat WHERE id_user = %d AND id_agenda_item = %d", getUserId(user),
 				id_agenda_item);
 		try {
 			Connection connection = getConnectionToDataBase();
@@ -598,7 +610,7 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 			if (queryResult.next())
 				return true;
 		} catch (Exception e) {
-			System.out.println("RmiServer.getChatHistoryFromAgendaItem() " + e.getMessage());
+			System.out.println("RmiServer.testIfUserIsOnChat() " + e.getMessage());
 		}
 		return false;
 	}
@@ -611,12 +623,12 @@ public class RmiServer extends UnicastRemoteObject implements RmiServerInterface
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(query);
 		} catch (Exception e) {
-			System.out.println("RmiServer.addClientToChat() " + e.getMessage());
+			System.out.println("RmiServer.addMessageToChat() " + e.getMessage());
 		}
-		return false;
+		return true;
 	}
 	
-	public boolean inviteUserToMeeting(String user, int id_meeting) throws RemoteException{
+	public boolean inviteUserToMeeting(String user, int id_meeting) throws RemoteException {
 		String query = String.format("INSERT INTO invite (id_meeting, id_user) VALUES (%d, %d)", id_meeting, getUserId(user));
 		try {
 			Connection connection = getConnectionToDataBase();

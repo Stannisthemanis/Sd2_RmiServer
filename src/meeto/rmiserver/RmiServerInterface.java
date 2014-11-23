@@ -19,7 +19,7 @@ public interface RmiServerInterface extends Remote {
 	
 	public String registerNewUser(String newUserInformation) throws RemoteException;
 	
-	public void removeUserFromAllChats(String user) throws RemoteException;
+	public int removeUserFromAllChats(String user) throws RemoteException;
 	
 	public void addNewMeeting(String newMeetingInformation) throws RemoteException;
 	
@@ -61,7 +61,7 @@ public interface RmiServerInterface extends Remote {
 	
 	public String getChatHistoryFromAgendaItem(int id_agenda_item) throws RemoteException;
 	
-	public void addClientToChat(int id_agenda_item, String user) throws RemoteException;
+	public boolean addClientToChat(int id_agenda_item, String user) throws RemoteException;
 	
 	public boolean testIfUserIsOnChat(int id_agenda_item, String user) throws RemoteException;
 	
